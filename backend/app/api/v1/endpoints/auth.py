@@ -2,7 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.models.models import User
-from app.schemas.schemas import Token, UserCreate, UserLogin, UserRead
+from app.schemas.user import  UserCreate, UserLogin, UserRead
+from fastapi.security import OAuth2PasswordRequestForm
+from app.schemas.token import Token
 from app.core.security import get_password_hash
 from app.crud.user import create_user as crud_create_user, get_user_by_email  # ← renommé
 from app.core.security import verify_password, create_access_token
@@ -26,8 +28,8 @@ async def create_user(request: UserCreate, db: AsyncSession = Depends(get_db),cu
     return created_user
 
 @auth_router.post("/login")
-async def login(request: UserLogin, db: AsyncSession = Depends(get_db)):
-    user = await get_user_by_email(db, request.email)
+async def login(formData: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
+    user = await get_user_by_email(db, formData.username)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -35,7 +37,7 @@ async def login(request: UserLogin, db: AsyncSession = Depends(get_db)):
         )
 
     # Vérification du mot de passe
-    if not verify_password(request.password, user.hashed_password):
+    if not verify_password(formData.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"

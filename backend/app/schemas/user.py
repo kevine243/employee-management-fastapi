@@ -25,12 +25,6 @@ class UserDisplay(UserBase):
 
     model_config = {"from_attributes": True}
 
-class Token(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
-
-class TokenData(BaseModel):
-    user_id: int | None = None
 
 # ← Ajout pour le endpoint /login
 class UserLogin(BaseModel):
