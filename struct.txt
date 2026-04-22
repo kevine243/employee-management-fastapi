@@ -1,0 +1,50 @@
+my_project/
+├── app/
+│   ├── __init__.py
+│   ├── main.py                  # Point d'entrée, création de l'app
+│   ├── config.py                # Settings (Pydantic BaseSettings)
+│   ├── dependencies.py          # Dépendances globales (auth, db session...)
+│   │
+│   ├── api/
+│   │   ├── __init__.py
+│   │   ├── v1/
+│   │   │   ├── __init__.py
+│   │   │   ├── router.py        # Agrège tous les routers v1
+│   │   │   └── endpoints/
+│   │   │       ├── users.py
+│   │   │       ├── items.py
+│   │   │       └── auth.py
+│   │
+│   ├── core/
+│   │   ├── security.py          # JWT, hashing, etc.
+│   │   └── exceptions.py        # Exceptions personnalisées
+│   │
+│   ├── models/                  # Modèles SQLAlchemy / ODM
+│   │   ├── user.py
+│   │   └── item.py
+│   │
+│   ├── schemas/                 # Schémas Pydantic (request/response)
+│   │   ├── user.py
+│   │   └── item.py
+│   │
+│   ├── crud/                    # Logique d'accès aux données
+│   │   ├── base.py
+│   │   ├── user.py
+│   │   └── item.py
+│   │
+│   ├── services/                # Logique métier complexe
+│   │   └── email.py
+│   │
+│   └── db/
+│       ├── base.py              # Import tous les models
+│       └── session.py           # Engine, SessionLocal
+│
+├── tests/
+│   ├── conftest.py
+│   ├── test_api/
+│   └── test_services/
+│
+├── alembic/                     # Migrations DB
+├── .env
+├── requirements.txt
+└── Dockerfile
