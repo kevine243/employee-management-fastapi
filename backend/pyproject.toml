@@ -27,4 +27,5 @@ dependencies = [
     "sqlalchemy-utils>=0.42.1",
     "sqlalchemy[asyncio]==2.0.35",
     "uvicorn[standard]==0.30.0",
+    "fastapi-mail>=1.4.1",
 ]
