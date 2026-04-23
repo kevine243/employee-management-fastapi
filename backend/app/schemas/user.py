@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr, model_validator
+from uuid import UUID, uuid4
 
 class UserBase(BaseModel):
     email: EmailStr
@@ -14,13 +15,13 @@ class UserCreate(UserBase):
         return self
 
 class UserRead(UserBase):
-    id: int
+    id: UUID
     is_active: bool
 
     model_config = {"from_attributes": True}
 
 class UserDisplay(UserBase):
-    id: int
+    id: UUID
     profile_picture_url: str | None = None
 
     model_config = {"from_attributes": True}

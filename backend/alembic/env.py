@@ -5,6 +5,7 @@ from app.db.base import Base
 from app.config import settings  # ← import direct
 from app.models.models import User, Role, Permission  # ← import direct]
 config = context.config
+from sqlalchemy_utils import EmailType  # ← ajoute ça
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

@@ -7,12 +7,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.core.security import decode_access_token
 from app.models.models import User
+from uuid import UUID
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
+
 async def get_current_user(
-    token: str = Depends(oauth2_scheme),
-    db: AsyncSession = Depends(get_db)
+    token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)
 ):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -29,15 +30,13 @@ async def get_current_user(
         raise credentials_exception
 
     try:
-        user_id = int(user_id_str)
+        user_id = UUID(user_id_str)
     except (TypeError, ValueError):
         raise credentials_exception
 
     # ← charge user ET roles en une seule requête
     result = await db.execute(
-        select(User)
-        .options(selectinload(User.roles))
-        .where(User.id == user_id)
+        select(User).options(selectinload(User.roles)).where(User.id == user_id)
     )
     user = result.scalar_one_or_none()
 
@@ -45,6 +44,7 @@ async def get_current_user(
         raise credentials_exception
 
     return user
+
 
 async def get_current_active_user(user=Depends(get_current_user)):
     if not user.is_active:
