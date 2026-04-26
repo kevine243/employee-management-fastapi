@@ -109,6 +109,9 @@ async def update_user_partial(
     if not existing:
         return None
 
+    if existing.roles and "admin" in [role.name for role in existing.roles]:
+        raise ValueError("Cannot modify an admin user")
+
     # 🔥 check department
     if "department_id" in update_data and update_data["department_id"]:
         dept_result = await db.execute(
