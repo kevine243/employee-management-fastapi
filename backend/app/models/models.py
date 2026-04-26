@@ -51,6 +51,7 @@ class User(Base):
     __tablename__ = "users"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email = Column(String(255), unique=True, nullable=False, index=True)
+    username = Column(String(255), nullable=False)
     hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean, default=False)
     is_verified = Column(Boolean, default=False)
@@ -61,7 +62,9 @@ class User(Base):
         UUID(as_uuid=True), ForeignKey("departments.id"), nullable=True
     )  # ← FK vers department
     roles = relationship("Role", secondary=user_roles, back_populates="users")
-    verifications = relationship("EmailVerification", back_populates="user")
+    verifications = relationship(
+        "EmailVerification", back_populates="user", cascade="all, delete-orphan"
+    )
     department = relationship("Department", back_populates="users")
 
     @property

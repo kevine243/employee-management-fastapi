@@ -23,36 +23,6 @@ from uuid import UUID
 auth_router = APIRouter()
 
 
-@auth_router.post(
-    "/create_user", response_model=UserRead, status_code=status.HTTP_201_CREATED
-)
-async def create_user(
-    background_tasks: BackgroundTasks,
-    request: UserCreate,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(RoleChecker(["admin"])),
-):
-    existing_user = await get_user_by_email(db, request.email)
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email Address already registered",
-        )
-
-    hashed_password = get_password_hash(request.password)
-    new_user = User(email=request.email, hashed_password=hashed_password)
-    created_user = await crud_create_user(db, new_user)
-
-    # Envoie email de confirmation
-    verification = await create_verification_token(db, created_user.id)
-
-    background_tasks.add_task(
-        send_confirmation_email, created_user.email, verification.token
-    )
-
-    return created_user
-
-
 @auth_router.post("/login", response_model=Token)
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)
