@@ -49,7 +49,7 @@ async def update_department_partial(
     return existing
 
 
-async def delete_dpt(db: AsyncSession, department_id):
+async def delete_dpt(db: AsyncSession, department_id: UUID):
     result = await db.execute(select(Department).where(Department.id == department_id))
     existing = result.scalar_one_or_none()
 
@@ -58,3 +58,12 @@ async def delete_dpt(db: AsyncSession, department_id):
     await db.delete(existing)
     await db.commit()
     return existing
+
+
+async def get_department_by_id(db: AsyncSession, department_id: UUID):
+    result = await db.execute(
+        select(Department)
+        .options(selectinload(Department.users))
+        .where(Department.id == department_id)
+    )
+    return result.scalar_one_or_none()

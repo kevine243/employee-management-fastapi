@@ -16,7 +16,7 @@ conf = ConnectionConfig(
 async def send_confirmation_email(email: str, token: str):
     # ← pointe directement vers l'API FastAPI
     confirm_url = f"http://localhost:8000/api/v1/auth/confirm-email?token={token}"
-    
+
     message = MessageSchema(
         subject="Confirm your email",
         recipients=[email],
@@ -29,8 +29,31 @@ async def send_confirmation_email(email: str, token: str):
         <p>Or copy this URL in your browser:</p>
         <p>{confirm_url}</p>
         """,
-        subtype=MessageType.html
+        subtype=MessageType.html,
     )
-    
+
+    fm = FastMail(conf)
+    await fm.send_message(message)
+
+
+async def send_password_reset_mail(email: str, token: str):
+    # ← pointe directement vers l'API FastAPI
+    reset_url = f"http://localhost:8000/api/v1/auth/reset-password?token={token}"
+
+    message = MessageSchema(
+        subject="Reset your password",
+        recipients=[email],
+        body=f"""
+        <h2>Reset your password</h2>
+        <p>Click the link below to reset your password:</p>
+        <a href="{reset_url}">Reset my password</a>
+        <p>This link expires in 24h.</p>
+        <br>
+        <p>Or copy this URL in your browser:</p>
+        <p>{reset_url}</p>
+        """,
+        subtype=MessageType.html,
+    )
+
     fm = FastMail(conf)
     await fm.send_message(message)

@@ -28,6 +28,19 @@ class UserRead(UserBase):
     model_config = {"from_attributes": True}
 
 
+class UserMe(UserBase):
+    id: UUID
+    username: str
+    email: EmailStr
+    is_active: bool
+    is_verified: bool
+    profile_picture_url: str | None = None
+    created_at: datetime
+    updated_at: datetime | None
+
+    model_config = {"from_attributes": True}
+
+
 class UserDisplay(UserBase):
     id: UUID
     username: str
@@ -42,6 +55,7 @@ class UserLogin(BaseModel):
 
 
 class RoleRead(BaseModel):
+    id: UUID
     name: str
 
     model_config = {"from_attributes": True}
@@ -77,3 +91,32 @@ class UserUpdate(BaseModel):
     is_verified: bool | None = None
     profile_picture: str | None = None
     department_id: UUID | None = None
+
+
+class EmailReset(BaseModel):
+    email: EmailStr
+
+
+class PasswordReset(BaseModel):
+    token: str
+    new_password: str = Field(min_length=6)
+    confirm_password: str
+
+    @model_validator(mode="after")
+    def passwords_match(self):
+        if self.new_password != self.confirm_password:
+            raise ValueError("passwords do not match")
+        return self
+
+
+# schema
+class ChangePassword(BaseModel):
+    old_password: str  # ← vérifie que c'est bien lui
+    new_password: str = Field(min_length=6)
+    confirm_password: str
+
+    @model_validator(mode="after")
+    def passwords_match(self):
+        if self.new_password != self.confirm_password:
+            raise ValueError("Passwords do not match")
+        return self

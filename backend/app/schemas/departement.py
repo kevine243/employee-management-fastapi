@@ -30,7 +30,7 @@ class DepartmentUpdate(BaseModel):
         if v is None:
             return v
 
-        if len(v) < 3:
+        if len(v) < 1:
             raise ValueError("Name too short")
 
         # if " " in v:

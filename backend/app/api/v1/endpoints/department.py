@@ -2,13 +2,22 @@ from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, 
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.rbac import RoleChecker
 from app.db.session import get_db
-from app.crud.department import get_all, create, update_department_partial, delete_dpt
+from app.crud.department import (
+    get_all,
+    create,
+    get_department_by_id,
+    update_department_partial,
+    delete_dpt,
+)
 from app.schemas.departement import DepartmentRead, DepartmentCreate, DepartmentUpdate
 from app.models.models import Department
 from sqlalchemy import select, update
 from app.core.rbac import RoleChecker
 from app.models.models import User
 from uuid import UUID
+from sqlalchemy.orm import selectinload
+
+from app.crud import department
 
 department_router = APIRouter()
 
@@ -30,7 +39,7 @@ async def get_all_departments(
 async def create_department(
     request: DepartmentCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(RoleChecker(["admin", "editor"])),
+current_user: User = Depends(RoleChecker(["admin", "editor"]))
 ):
     new_department = Department(name=request.name)
     created = await create(db, new_department)
@@ -83,3 +92,20 @@ async def delete_department(
             )
         )
     return delete
+
+
+@department_router.get("/{department_id}", response_model=DepartmentRead)
+async def get_department_by_id_route(
+    department_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(RoleChecker(["admin", "editor"])),
+):
+    department = await get_department_by_id(db, department_id)
+
+    if not department:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Department not found",
+        )
+
+    return department

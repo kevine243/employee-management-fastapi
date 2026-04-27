@@ -30,3 +30,8 @@ httpx==0.27.2
 
 # Dev
 ruff==0.6.9
+
+#images
+Pillow==10.4.0
+python-multipart==0.0.12
+aiofiles==24.1.0

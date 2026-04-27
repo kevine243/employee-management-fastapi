@@ -4,8 +4,17 @@ from datetime import datetime, timedelta, timezone
 import secrets
 from sqlalchemy.orm import selectinload
 from fastapi import HTTPException, status
-from app.models.models import User, EmailVerification, Department
+from app.models.models import (
+    RefreshToken,
+    Role,
+    User,
+    EmailVerification,
+    Department,
+    PasswordResetToken,
+)
 from uuid import UUID
+
+from app.core.security import get_password_hash
 
 
 # ── User ──────────────────────────────────────────
@@ -13,7 +22,14 @@ from uuid import UUID
 
 # by uuid
 async def get_user_by_id(db: AsyncSession, user_id: UUID) -> User | None:
-    result = await db.execute(select(User).where(User.id == user_id))
+    result = await db.execute(
+        select(User)
+        .options(
+            selectinload(User.roles),
+            selectinload(User.department),  # 👈 AJOUT IMPORTANT
+        )
+        .where(User.id == user_id)
+    )
     return result.scalar_one_or_none()
 
 
@@ -153,3 +169,83 @@ async def delete_user(db: AsyncSession, user_id: UUID):
     await db.delete(existing)  # ← supprime user + verifications automatiquement
     await db.commit()
     return {"message": f"User {user_id} deleted successfully"}
+
+
+# crud/user.py
+async def create_refresh_token(db: AsyncSession, user_id: UUID) -> RefreshToken:
+    # Révoque les anciens tokens
+    await db.execute(
+        update(RefreshToken)
+        .where(RefreshToken.user_id == user_id, RefreshToken.is_revoked.is_(False))
+        .values(is_revoked=True)
+    )
+
+    token = RefreshToken(
+        user_id=user_id,
+        token=secrets.token_urlsafe(64),
+        expires_at=datetime.now(timezone.utc) + timedelta(days=7),
+    )
+    db.add(token)
+    await db.commit()
+    await db.refresh(token)
+    return token
+
+
+async def get_refresh_token(db: AsyncSession, token: str) -> RefreshToken | None:
+    result = await db.execute(
+        select(RefreshToken).where(
+            RefreshToken.token == token,
+            RefreshToken.is_revoked.is_(False),
+            RefreshToken.expires_at > datetime.now(timezone.utc),
+        )
+    )
+    return result.scalar_one_or_none()
+
+
+async def revoke_refresh_token(db: AsyncSession, token: str) -> None:
+    await db.execute(
+        update(RefreshToken).where(RefreshToken.token == token).values(is_revoked=True)
+    )
+    await db.commit()
+
+
+async def get_user_with_relations(db: AsyncSession, user_id: UUID) -> User | None:
+    result = await db.execute(
+        select(User)
+        .options(selectinload(User.roles), selectinload(User.department))
+        .where(User.id == user_id)
+    )
+    return result.scalar_one_or_none()
+
+
+async def change_password(db: AsyncSession, user_id: UUID, new_password: str):
+    await db.execute(
+        update(User)
+        .where(User.id == user_id)
+        .values(hashed_password=get_password_hash(new_password))
+    )
+    await db.commit()
+
+
+# upload profile picture
+async def update_profile_picture(db: AsyncSession, user_id: UUID, filename: str):
+    await db.execute(
+        update(User).where(User.id == user_id).values(profile_picture=filename)
+    )
+    await db.commit()
+
+
+async def delete_profile_picture(db: AsyncSession, user_id: UUID):
+    await db.execute(
+        update(User).where(User.id == user_id).values(profile_picture=None)
+    )
+    await db.commit()
+
+
+# remode profile picture from files
+async def remove_profile_picture_from_files(filename: str):
+    import os
+
+    file_path = os.path.join("app", "static", "profile_pictures", filename)
+    if os.path.exists(file_path):
+        os.remove(file_path)
