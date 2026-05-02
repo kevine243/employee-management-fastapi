@@ -200,3 +200,9 @@ uv run alembic upgrade head
 
 - Make sure `FRONTEND_URL` in `.env` matches your frontend URL
 - Check `allow_origins` in `main.py`
+
+## THANK YOU FOR USING THIS EMPLOYEE MANAGEMENT SYSTEM!
+
+If you have any questions or need help, feel free to reach out!
+
+## AND YOU CAN LEAVE A STAR ON GITHUB IF YOU LIKE THE PROJECT!⭐ ✌
