@@ -205,4 +205,4 @@ uv run alembic upgrade head
 
 If you have any questions or need help, feel free to reach out!
 
-## AND YOU CAN LEAVE A STAR ON GITHUB IF YOU LIKE THE PROJECT!⭐ ✌
+## AND YOU CAN LEAVE A STAR ON MY GITHUB IF YOU LIKE THE PROJECT!⭐ ✌
