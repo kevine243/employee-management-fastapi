@@ -17,6 +17,7 @@ from app.crud.user import (
     get_user_by_email,
     create_verification_token,
     revoke_refresh_token,
+    get_refresh_token,
 )
 from app.crud.auth import (
     create_reset_password_token,

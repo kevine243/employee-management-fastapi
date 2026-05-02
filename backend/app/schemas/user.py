@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr, model_validator, Field
 from uuid import UUID
 from datetime import datetime
+from .department import DepartmentRead
 
 
 class UserBase(BaseModel):
@@ -28,6 +29,13 @@ class UserRead(UserBase):
     model_config = {"from_attributes": True}
 
 
+class RoleRead(BaseModel):
+    id: UUID
+    name: str
+
+    model_config = {"from_attributes": True}
+
+
 class UserMe(UserBase):
     id: UUID
     username: str
@@ -37,6 +45,8 @@ class UserMe(UserBase):
     profile_picture_url: str | None = None
     created_at: datetime
     updated_at: datetime | None
+    roles: list[RoleRead] = []
+    department: DepartmentRead | None = None
 
     model_config = {"from_attributes": True}
 
@@ -52,13 +62,6 @@ class UserDisplay(UserBase):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
-
-
-class RoleRead(BaseModel):
-    id: UUID
-    name: str
-
-    model_config = {"from_attributes": True}
 
 
 class DepartmentRead(BaseModel):
@@ -90,7 +93,7 @@ class UserUpdate(BaseModel):
     is_active: bool | None = None
     is_verified: bool | None = None
     profile_picture: str | None = None
-    department_id: UUID | None = None
+    department: DepartmentRead | None = None
 
 
 class EmailReset(BaseModel):

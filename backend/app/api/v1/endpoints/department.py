@@ -9,7 +9,7 @@ from app.crud.department import (
     update_department_partial,
     delete_dpt,
 )
-from app.schemas.departement import DepartmentRead, DepartmentCreate, DepartmentUpdate
+from app.schemas.department import DepartmentRead, DepartmentCreate, DepartmentUpdate
 from app.models.models import Department
 from sqlalchemy import select, update
 from app.core.rbac import RoleChecker
@@ -39,7 +39,7 @@ async def get_all_departments(
 async def create_department(
     request: DepartmentCreate,
     db: AsyncSession = Depends(get_db),
-current_user: User = Depends(RoleChecker(["admin", "editor"]))
+    current_user: User = Depends(RoleChecker(["admin", "editor"])),
 ):
     new_department = Department(name=request.name)
     created = await create(db, new_department)

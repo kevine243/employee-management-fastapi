@@ -36,7 +36,9 @@ async def get_current_user(
 
     # ← charge user ET roles en une seule requête
     result = await db.execute(
-        select(User).options(selectinload(User.roles)).where(User.id == user_id)
+        select(User)
+        .options(selectinload(User.roles), selectinload(User.department))
+        .where(User.id == user_id)
     )
     user = result.scalar_one_or_none()
 
