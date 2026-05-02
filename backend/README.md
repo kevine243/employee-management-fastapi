@@ -29,6 +29,12 @@ cd employee-management/backend
 uv sync
 ```
 
+If you prefer `requirements.txt`, install with:
+
+```bash
+pip install -r requirements.txt
+```
+
 ### 3. Create the `.env` file
 
 Create a `.env` file in the `backend/` directory with the following variables:
